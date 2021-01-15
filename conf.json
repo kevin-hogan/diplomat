@@ -1,0 +1,7 @@
+{
+    "OverspeakingPlugin": {
+        "MessageWindow": 5,
+        "MessageCountThreshold": 3,
+        "WarningFormatString": "{0} is overspeaking!"
+    }
+}
