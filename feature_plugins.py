@@ -1,9 +1,9 @@
-from chatbot import ChatbotPlugin, Message, Author
+from chatbot import FeaturePlugin, Message, Author
 from typing import List
 from collections import defaultdict, deque
 from math import isclose
 
-class OverspeakingPlugin(ChatbotPlugin):
+class OverspeakingPlugin(FeaturePlugin):
     def __init__(self, config: dict):
         message_window = int(config["MessageWindow"])
         message_count_threshold = int(config["MessageCountThreshold"])
@@ -46,7 +46,7 @@ class OverspeakingPlugin(ChatbotPlugin):
                 if message_count >= message_count_threshold]
 
 
-    def generate_chatbot_messages(self, chat_transcript: List[Message], author_id_for_chatbot: int) -> List[Message]:
+    def generate_interventions(self, chat_transcript: List[Message], author_id_for_chatbot: int) -> List[Message]:
         overspeaking_authors = OverspeakingPlugin.get_overspeaking_authors(
             chat_transcript,
             author_id_for_chatbot,

@@ -1,5 +1,4 @@
 import abc
-import system_plugin_functions
 from typing import List
 
 class Author():
@@ -25,18 +24,18 @@ class Message:
     def __repr__(self):
         return f"Message(author={repr(self.author)}, timestamp={repr(self.timestamp)}, text={repr(self.text)})"
 
-class ChatbotPlugin(metaclass=abc.ABCMeta):
+class FeaturePlugin(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def __init__(self, config: dict):
         pass
 
     @abc.abstractmethod
-    def generate_chatbot_messages(self, chat_transcript: List[Message], author_id_for_chatbot: int) -> List[Message]:
+    def generate_interventions(self, chat_transcript: List[Message], author_id_for_chatbot: int) -> List[Message]:
        pass
 
-def generate_chatbot_messages(plugins: ChatbotPlugin, chat_transcript: List[Message], author_id_for_chatbot: int) -> List[Message]:
+def generate_interventions(plugins: FeaturePlugin, chat_transcript: List[Message], author_id_for_chatbot: int) -> List[Message]:
     messages = []
     for p in plugins:
-        messages += p.generate_chatbot_messages(chat_transcript, author_id_for_chatbot)
+        messages += p.generate_interventions(chat_transcript, author_id_for_chatbot)
     
     return messages
