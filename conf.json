@@ -1,7 +1,16 @@
 {
-    "OverspeakingPlugin": {
-        "MessageWindow": 5,
-        "MessageCountThreshold": 3,
-        "WarningFormatString": "{0} is overspeaking!"
+    "DiversityPlugin": {
+        "CheckPastTill": 10,
+        "DiversityCheckList": [
+            {"WordList": ["Guys", "Gals", "Ladies", "Gals"], "Substitutes":  "People, Folks, Teammates"},
+            {"WordList": ["Handicapped", "Disabled"], "Substitutes": "People with disabilities"},
+            {"WordList": ["Dwarf", "Midget"], "Substitutes": "Person of short stature"},
+            {"WordList": ["Females"], "Substitutes": "Women"},
+            {"WordList": ["Master", "Slave", "Master/Slave"], "Substitutes": "Primary/Replica, Primary/Standby"},
+            {"WordList": ["Blacklist", "Whitelist", "Blacklist/Whitelist"], "Substitutes": "Allowlist, Blocklist"},
+            {"WordList": ["Man hours", "Manhours", "Manpower"], "Substitutes": "Workforce, Team, Personnel"},
+            {"WordList": ["Chairman", "Foreman"], "Substitutes":  "Chairperson, Chair, Moderator, Discussion Leader"}
+        ],
+        "WarningPhrase": "Please consider using more inclusive terms like {} instead of {}"
     }
 }

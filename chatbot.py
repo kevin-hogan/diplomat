@@ -1,6 +1,7 @@
 import abc
 from typing import List
 
+
 class Author():
     def __init__(self, id, name):
         self.id = id
@@ -11,6 +12,7 @@ class Author():
 
     def __repr__(self):
         return f"Author(id={repr(self.id)}, name={repr(self.name)})"
+
 
 class Message:
     def __init__(self, author: Author, timestamp: float, text: str):
@@ -24,6 +26,7 @@ class Message:
     def __repr__(self):
         return f"Message(author={repr(self.author)}, timestamp={repr(self.timestamp)}, text={repr(self.text)})"
 
+
 class FeaturePlugin(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def __init__(self, config: dict):
@@ -32,6 +35,7 @@ class FeaturePlugin(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def generate_interventions(self, chat_transcript: List[Message], author_id_for_chatbot: int) -> List[Message]:
        pass
+
 
 def generate_interventions(plugins: FeaturePlugin, chat_transcript: List[Message], author_id_for_chatbot: int) -> List[Message]:
     messages = []

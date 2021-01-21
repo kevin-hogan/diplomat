@@ -14,14 +14,14 @@ class SlackToBotIntegrator(ChatServiceToBotIntegrator):
 
     def request_transcript_and_convert_to_message_list(self) -> List[Message]:
         response = client.conversations_history(channel=self.channel_id)
-        messages = [Message(Author(m["user"], m["user"]), m["ts"], m["text"]) for m in response.data["messages"] if "user" in m.keys()]
+        messages = [Message(Author(m["user"], m["user"]), m["ts"], m["text"])
+                    for m in response.data["messages"] if "user" in m.keys()]
         messages.reverse()
         return messages
 
     def post_chatbot_interventions(self, interventions: List[Message]) -> None:
         for i in interventions:
             client.chat_postMessage(channel=self.channel_id, text=i.text)
-    
 
 
 if __name__ == "__main__":
@@ -41,6 +41,9 @@ if __name__ == "__main__":
             bot_user_id = arg
 
     client = WebClient(token=slack_bot_token)
-    SlackToBotIntegrator(path_to_config, client, channel_id, bot_user_id).start()
+    SBI = SlackToBotIntegrator(path_to_config, client, channel_id, bot_user_id)
+    SBI.seconds_per_poll = 10
+    SBI.start()
+
     
     

@@ -2,6 +2,51 @@ from chatbot import FeaturePlugin, Message, Author
 from typing import List
 from collections import defaultdict, deque
 from math import isclose
+from datetime import datetime
+
+import string
+
+
+class DiversityPlugin(FeaturePlugin):
+    def __init__(self, config: dict):
+        self.config = config
+        self.check_past_till = config["CheckPastTill"]
+        self.diversity_list = config["DiversityCheckList"]
+        self.diversity_map = {}
+        self.warning_format_string = config["WarningPhrase"]
+
+        for c in self.diversity_list:
+            for w in c["WordList"]:
+                self.diversity_map[w.lower()] = c["Substitutes"]
+
+    def generate_interventions(self, chat_transcript: List[Message], author_id_for_chatbot: int) -> List[Message]:
+
+        cur_time = datetime.now()
+        message_list = []
+
+        for chat in chat_transcript:
+            # Skip messages posted by the chatbot!
+            if chat.author.id == author_id_for_chatbot:
+                continue
+
+            time_diff = (cur_time - datetime.fromtimestamp(chat.timestamp)).total_seconds()
+            # Only consider messages posted in the last "check_past_till" seconds
+            if time_diff > self.check_past_till:
+                continue
+
+            message = chat.text.split()
+            print(message)
+            for m in message:
+                m = m.translate(str.maketrans('', '', string.punctuation))
+
+                if self.diversity_map.get(m.lower()) is None:
+                    continue
+
+                message_list.append(Message(Author(author_id_for_chatbot, "DiversityBot"), -1,
+                                            self.warning_format_string.format(self.diversity_map[m.lower()], m)))
+
+        return message_list
+
 
 class OverspeakingPlugin(FeaturePlugin):
     def __init__(self, config: dict):
@@ -44,7 +89,6 @@ class OverspeakingPlugin(FeaturePlugin):
         return [author_id_to_author[author_id]
                 for author_id, message_count in author_id_to_message_count.items()
                 if message_count >= message_count_threshold]
-
 
     def generate_interventions(self, chat_transcript: List[Message], author_id_for_chatbot: int) -> List[Message]:
         overspeaking_authors = OverspeakingPlugin.get_overspeaking_authors(
