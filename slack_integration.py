@@ -1,7 +1,7 @@
 import sys
 import getopt
 from chat_service_to_bot_integrator import ChatServiceToBotIntegrator
-from typing import List
+from typing import List, Dict, Union, Any
 from chatbot import Message, Author
 from slack_sdk import WebClient
 
@@ -19,9 +19,14 @@ class SlackToBotIntegrator(ChatServiceToBotIntegrator):
         messages.reverse()
         return messages
 
-    def post_chatbot_interventions(self, interventions: List[Message]) -> None:
-        for i in interventions:
-            client.chat_postMessage(channel=self.channel_id, text=i.text)
+    def post_chatbot_interventions(self, interventions: List[Dict[str, Union[Message, Any]]]) -> None:
+        for m_dict in interventions:
+            if m_dict.get("ephemeral", False) is False:
+                i = m_dict["message"]
+                client.chat_postMessage(channel=self.channel_id, text=i.text)
+            else:
+                i = m_dict["message"]
+                client.chat_postEphemeral(channel=self.channel_id, text=i.text, user=m_dict["author_id"])
 
 
 if __name__ == "__main__":

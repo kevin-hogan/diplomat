@@ -3,6 +3,7 @@ from typing import List
 from collections import defaultdict, deque
 from math import isclose
 from datetime import datetime
+from typing import Dict, Any, Union
 
 import string
 
@@ -14,12 +15,13 @@ class DiversityPlugin(FeaturePlugin):
         self.diversity_list = config["DiversityCheckList"]
         self.diversity_map = {}
         self.warning_format_string = config["WarningPhrase"]
+        self.ephemeral = config["EphemeralMessages"]
 
         for c in self.diversity_list:
             for w in c["WordList"]:
                 self.diversity_map[w.lower()] = c["Substitutes"]
 
-    def generate_interventions(self, chat_transcript: List[Message], author_id_for_chatbot: int) -> List[Message]:
+    def generate_interventions(self, chat_transcript: List[Message], author_id_for_chatbot: int) -> List[Dict[str, Union[Message, Any]]]:
 
         cur_time = datetime.now()
         message_list = []
@@ -35,15 +37,19 @@ class DiversityPlugin(FeaturePlugin):
                 continue
 
             message = chat.text.split()
-            print(message)
+            print(chat)
             for m in message:
                 m = m.translate(str.maketrans('', '', string.punctuation))
 
                 if self.diversity_map.get(m.lower()) is None:
                     continue
 
-                message_list.append(Message(Author(author_id_for_chatbot, "DiversityBot"), -1,
-                                            self.warning_format_string.format(self.diversity_map[m.lower()], m)))
+                message_list.append(
+                    {"message": Message(author=Author(author_id_for_chatbot, "DiversityBot"), timestamp=-1,
+                                        text=self.warning_format_string.format(self.diversity_map[m.lower()], m)),
+                     "ephemeral": True,
+                     "author_id": chat.author.id}
+                )
 
         return message_list
 
@@ -90,14 +96,14 @@ class OverspeakingPlugin(FeaturePlugin):
                 for author_id, message_count in author_id_to_message_count.items()
                 if message_count >= message_count_threshold]
 
-    def generate_interventions(self, chat_transcript: List[Message], author_id_for_chatbot: int) -> List[Message]:
+    def generate_interventions(self, chat_transcript: List[Message], author_id_for_chatbot: int) -> List[Dict[str, Union[Message, Any]]]:
         overspeaking_authors = OverspeakingPlugin.get_overspeaking_authors(
             chat_transcript,
             author_id_for_chatbot,
             self.message_window,
             self.message_count_threshold)
-        overspeaking_warnings = [
-            Message(Author(author_id_for_chatbot, "Chatbot"), -1, self.warning_format_string.format(a.name))
-            for a in overspeaking_authors]
+        overspeaking_warnings = [{"ephemeral": False, "message": Message(Author(author_id_for_chatbot, "Chatbot"),
+                                                                         -1, self.warning_format_string.format(a.name))}
+                                 for a in overspeaking_authors]
         
         return overspeaking_warnings

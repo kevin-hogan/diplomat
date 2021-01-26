@@ -1,5 +1,6 @@
 {
     "DiversityPlugin": {
+        "EphemeralMessages": true,
         "CheckPastTill": 10,
         "DiversityCheckList": [
             {"WordList": ["Guys", "Gals", "Ladies", "Gals"], "Substitutes":  "People, Folks, Teammates"},
