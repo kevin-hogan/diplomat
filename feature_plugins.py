@@ -28,16 +28,18 @@ class DiversityPlugin(FeaturePlugin):
 
         for chat in chat_transcript:
             # Skip messages posted by the chatbot!
-            if chat.author.id == author_id_for_chatbot:
-                continue
 
             time_diff = (cur_time - datetime.fromtimestamp(chat.timestamp)).total_seconds()
             # Only consider messages posted in the last "check_past_till" seconds
             if time_diff > self.check_past_till:
                 continue
 
+            if chat.author.id == author_id_for_chatbot:
+                # print("Found something")
+                continue
+
             message = chat.text.split()
-            print(chat)
+            # print(chat)
             for m in message:
                 m = m.translate(str.maketrans('', '', string.punctuation))
 
