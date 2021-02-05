@@ -1,8 +1,7 @@
 import abc
 import time
 import inspect
-import json
-import feature_plugins
+from plugins import feature_plugins
 from typing import List, Dict
 from chatbot import Message, generate_interventions, Author
 from datetime import datetime

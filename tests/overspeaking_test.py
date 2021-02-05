@@ -1,5 +1,5 @@
 import inspect
-import feature_plugins
+from plugins import feature_plugins
 from chatbot import generate_interventions, Message, Author
 
 CHATBOT_AUTHOR_ID = -1

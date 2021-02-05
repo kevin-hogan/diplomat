@@ -1,6 +1,6 @@
 import sys
 import getopt
-from chat_service_to_bot_integrator import ChatServiceToBotIntegrator
+from integrator.chat_service_to_bot_integrator import ChatServiceToBotIntegrator
 from typing import List, Dict, Union, Any
 from chatbot import Message, Author
 from slack_sdk import WebClient
@@ -49,6 +49,3 @@ if __name__ == "__main__":
     SBI = SlackToBotIntegrator(path_to_config, client, channel_id, bot_user_id)
     SBI.seconds_per_poll = 10
     SBI.start()
-
-    
-    
