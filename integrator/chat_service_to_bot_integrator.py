@@ -26,7 +26,7 @@ class ChatServiceToBotIntegrator(metaclass=abc.ABCMeta):
         cur_time = datetime.now()
         time_diff = (cur_time - datetime.fromtimestamp(chat.timestamp)).total_seconds()
         # Only consider messages posted in the last "check_past_till" seconds
-        if time_diff > 4:
+        if time_diff > 5:
             return True
 
         if chat.author.id == self.chatbot_author_id:
@@ -73,10 +73,11 @@ class ChatServiceToBotIntegrator(metaclass=abc.ABCMeta):
                     if self.filter_transcript(chat):
                         continue
                     else:
+                        print("Question: {}, Answer: {}".format(question, chat.text))
                         c.update_config(question, chat.text)
                         received_answer = True
 
-                time.sleep(3)
+                time.sleep(5)
 
         conf_dict = c.get_config()
         print(conf_dict)
@@ -88,7 +89,7 @@ class ChatServiceToBotIntegrator(metaclass=abc.ABCMeta):
         self.post_chatbot_interventions([{"message": m, "ephemeral": False}])
 
         feature_plugin_classes = [member for member in inspect.getmembers(feature_plugins, inspect.isclass)
-                                if member[1].__module__ == "feature_plugins" and member[0] in conf_dict.keys()]
+                                if member[1].__module__ == "plugins.feature_plugins" and member[0] in conf_dict.keys()]
 
         plugins = [fpc[1](conf_dict[fpc[0]]) for fpc in feature_plugin_classes]
 

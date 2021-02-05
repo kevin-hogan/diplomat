@@ -39,7 +39,7 @@ class DiversityPlugin(FeaturePlugin):
                 continue
 
             message = chat.text.split()
-            # print(chat)
+            print(chat)
             for m in message:
                 m = m.translate(str.maketrans('', '', string.punctuation))
 
