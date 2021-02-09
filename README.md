@@ -30,8 +30,7 @@ which can be overridden. All chatbots inherit from this class.
     and convert it into a list of messages.
     - `post_chatbot_interventions`: Send messages to your chat service.     
 
-One sample example is shown below:
-    - Sample Subclass: `Class SlackToBotIntegrator`: This is a sample slackbot integration class which inherits from the ChatService class defined above. The class contains APIs to receive a transcript from slack and APIs to post interventions to slack. 
+You can find SlackToBotIntegrator (in slack_integration.py) which is a sample slackbot integration class which inherits from the ChatService class defined above. The class contains APIs to receive a transcript from slack and APIs to post interventions to slack. 
 
 * `Class FeaturePlugin`: This is the super class which will be inherited by all plugins. The class extends 1 API called
 `generate_interventions`. The API takes the `chat_transcript` and `author_id` as input. The class also receives the 
