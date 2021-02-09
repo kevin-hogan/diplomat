@@ -30,14 +30,14 @@ which can be overridden. All chatbots inherit from this class.
     and convert it into a list of messages.
     2. `post_chatbot_interventions`: Send messages to your chat service.     
     <br>
-    * Sample Subclass: `Class SlackToBotIntegrator`: This is a sample slackbot integration class which inherits from the ChatService class 
+* Sample Subclass: `Class SlackToBotIntegrator`: This is a sample slackbot integration class which inherits from the ChatService class 
 defined above. The class contains APIs to receive a transcript from slack and APIs to post interventions to slack. 
 
 * `Class FeaturePlugin`: This is the super class which will be inherited by all plugins. The class extends 1 API called
 `generate_interventions`. The API takes the `chat_transcript` and `author_id` as input. The class also receives the 
 configuration parameters passed into the constructor. 
 
-    * Sample Plugin: `class OverSpeakingPlugin`:  You can find this class in `feature_plugins.py`. We see that config is passed 
+    * Sample Plugin: `class OverspeakingPlugin`:  You can find this class in `feature_plugins.py`. We see that config is passed 
 as a parameter to the `__init__` class. The plugin has a static method called `get_overspeaking_authors`. Ultimately, the plugin
 implements the `generate_interventions function.` The presence or absence of a feature in the configuration file determines whether that feature will be enabled for a particular agent.  
  
