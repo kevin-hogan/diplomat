@@ -3,7 +3,7 @@
 Diplomat is a conversational agent framework for goal-oriented group discussion. Recent work in human-computer interaction has explored the use of conversational agents as facilitators for group goal-oriented discussions. Inspired by this work and by the apparent lack of tooling available to support it, we created Diplomat, a Python-based framework for building conversational agent facilitators. Diplomat is designed to support simple specification of agent functionality as well as customizable integration with online chat services. We document a preliminary user study we conducted to help inform the design of Diplomat.
 
 ## How to run Diplomat? 
-Diplomat has currently been configured to run seamlessly with Slack. 
+Diplomat provides a default configuration with Slack.
 
 #### TLDR:
 Setup your python environment by running 
@@ -18,7 +18,7 @@ You need the following to run an instance of diplomat:
 Once you have these, simply run diplomat by using the following command: 
 `python3 slack_integration -p conf.json -t <slackbot-token> -c <channel-id> -b <bot-id>` 
 
-### Detailed steps for a developing your custom plugin:
+### Devloping a custom plugin and Slack setup:
 #### Diplomat's architecture
 Diplomat's software consists of the following classes: 
 
@@ -39,7 +39,7 @@ configuration parameters passed into the constructor.
 
     * Sample Plugin: `class OverSpeakingPlugin`:  You can find this class in `feature_plugins.py`. We see that config is passed 
 as a parameter to the `__init__` class. The plugin has a static method called `get_overspeaking_authors`. Ultimately, the plugin
-implements the `generate_interventions class.` 
+implements the `generate_interventions function.` The presence or absence of a feature in the configuration file determines whether that feature will be enabled for a particular agent.  
  
 
 #### Creating the config file: 
@@ -52,13 +52,13 @@ read and passed as an argument to the constructor of the main class.
 You need to do the following to setup your slackbot:  
 * Visit https://api.slack.com/apps and click on `Create New App`. Add it to your workspace.  
 * Click on `Workflow Steps` from the side bar and click on `Add features and functionality` and enable `Incoming Webhooks`.
-* Click on `OAuth & Permissions` and add scopes to your bot. Ideally, you would need `channels:history`, `chat:write`,
+* Click on `OAuth & Permissions` and add scopes to your bot. At the minimum, you would need `channels:history`, `chat:write`,
 `incoming-webhook`, `groups:history` to your chatbot. You can add more fields depending on your requirements. 
 * Reinstall the app to your workspace. 
 * You should be able to find the `Bot User OAuth Access Token` here. That will be the `bot token` used while running `diplomat`. 
 
 
 #### Getting the channel id / bot id:
-Getting the channel ID is slightly tricky. One hacky way of doing this is to open your channel in Slack in your browser. 
+One way of doing this is to open your channel in Slack in your browser. 
 Navigate to the channel you wish to add the slackbot to. The URL will contain the channel ID. It will start with `C` and 
 have the following format: `app.slack.com/client/<team-id>/<channel-id>`.
