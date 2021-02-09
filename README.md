@@ -26,14 +26,12 @@ Diplomat's software consists of the following classes:
 It loads classes (plugins) from the `feature_plugins.py` file into memory along with the user defined `conf.json`. 
 It then loads the required plugin and passes the respective configuration to the plugin. This class has 2 main functions 
 which can be overridden. All chatbots inherit from this class. 
-    1. `request_transcript_and_convert_to_message_list`: Receive transcript from your chat service (e.g. Slack, Teams)
+    - `request_transcript_and_convert_to_message_list`: Receive transcript from your chat service (e.g. Slack, Teams)
     and convert it into a list of messages.
-    2. `post_chatbot_interventions`: Send messages to your chat service.     
-    <br>
+    - `post_chatbot_interventions`: Send messages to your chat service.     
 
 One sample example is shown below:
-    - Sample Subclass: `Class SlackToBotIntegrator`: This is a sample slackbot integration class which inherits from the ChatService class 
-defined above. The class contains APIs to receive a transcript from slack and APIs to post interventions to slack. 
+    - Sample Subclass: `Class SlackToBotIntegrator`: This is a sample slackbot integration class which inherits from the ChatService class defined above. The class contains APIs to receive a transcript from slack and APIs to post interventions to slack. 
 
 * `Class FeaturePlugin`: This is the super class which will be inherited by all plugins. The class extends 1 API called
 `generate_interventions`. The API takes the `chat_transcript` and `author_id` as input. The class also receives the 
