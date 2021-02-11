@@ -34,7 +34,7 @@ You can find SlackToBotIntegrator (in slack_integration.py) which is a sample sl
 
 * `Class FeaturePlugin`: This is the super class which will be inherited by all plugins. The class extends 1 API called
 `generate_interventions`. The API takes the `chat_transcript` and `author_id` as input. The class also receives the 
-configuration parameters passed into the constructor. The presence or absence of a feature in the configuration file determines whether that feature will be enabled for a particular agent.  
+configuration parameters passed into the constructor. 
 
     - Sample Plugin: `class OverspeakingPlugin`:  You can find this class in `feature_plugins.py`. We see that config is passed 
 as a parameter to the `__init__` class. The plugin has a static method called `get_overspeaking_authors`. Ultimately, the plugin
@@ -44,7 +44,7 @@ implements the `generate_interventions function.`
 The configuration file is a dictionary containing names of the plugins to be used along with the parameters required 
 by the respective plugins. e.g. The OverspeakingPlugin expects the values "Message Window Size", etc. 
 As a plugin developer, you can choose what parameters you wish to source from the environment. The config file will be 
-read and passed as an argument to the constructor of the main class. 
+read and passed as an argument to the constructor of the main class. The presence or absence of a feature in the configuration file determines whether that feature will be enabled for a particular agent.  
 
 #### Setting up the SlackBot app:
 You need to do the following to setup your slackbot:  
