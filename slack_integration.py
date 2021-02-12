@@ -32,7 +32,7 @@ class SlackToBotIntegrator(ChatServiceToBotIntegrator):
 if __name__ == "__main__":
     argv = sys.argv[1:]
     opts, _ = getopt.getopt(argv, "p:t:c:b:d")
-    if len(opts) != 4 or len(opts) != 5:
+    if len(opts) != 4 and len(opts) != 5:
         print("slack_integration.py -p <path_to_config> -t <slack-bot-token> -c <channel-id> -b <bot-user-id> "
               "[-d <dynamic-configuration>]")
         sys.exit(2)
