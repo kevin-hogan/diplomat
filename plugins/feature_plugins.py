@@ -30,7 +30,7 @@ class SummarizerPlugin(FeaturePlugin):
 
         last_message = chat_transcript[-1].text
 
-        timeline = [i for i in last_message.split() if i.isdigit()]
+        timeline = [i for i in last_message if i.isdigit()]
 
         td = int("".join(timeline))
 
