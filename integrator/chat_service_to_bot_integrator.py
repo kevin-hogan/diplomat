@@ -1,6 +1,8 @@
 import abc
 import time
 import inspect
+import json
+
 from plugins import feature_plugins
 from typing import List, Dict
 from chatbot import Message, generate_interventions, Author
@@ -9,10 +11,12 @@ from config_generator import ConfigGenerator
 
 
 class ChatServiceToBotIntegrator(metaclass=abc.ABCMeta):
-    def __init__(self, path_to_config: str, seconds_per_poll: float = 10, chatbot_author_id: int = -1):
+    def __init__(self, path_to_config: str, seconds_per_poll: float = 10, chatbot_author_id: int = -1,
+                 dynamic_configuration: bool = False):
         self.path_to_config = path_to_config
         self.seconds_per_poll = seconds_per_poll
         self.chatbot_author_id = chatbot_author_id
+        self.dynamic_configuration = dynamic_configuration
 
     @abc.abstractmethod
     def request_transcript_and_convert_to_message_list(self) -> List[Message]:
@@ -36,57 +40,62 @@ class ChatServiceToBotIntegrator(metaclass=abc.ABCMeta):
 
     def start(self):
 
-        # Config Generator: Look for start
-        start_finder = False
+        if self.dynamic_configuration:
+            # Config Generator: Look for start
+            start_finder = False
 
-        while not start_finder:
-            transcript = self.request_transcript_and_convert_to_message_list()
-            for chat in transcript:
-                # Skip messages posted by the chatbot!
-                if self.filter_transcript(chat):
-                    continue
+            while not start_finder:
+                transcript = self.request_transcript_and_convert_to_message_list()
+                for chat in transcript:
+                    # Skip messages posted by the chatbot!
+                    if self.filter_transcript(chat):
+                        continue
 
-                if chat.text == "/start diplomat":
-                    start_finder = True
-                    break
+                    if chat.text == "/start diplomat":
+                        start_finder = True
+                        break
 
-            time.sleep(3)
+                time.sleep(3)
 
-        m = Message(text="Initializing the Diversity Bot", author=Author(self.chatbot_author_id, "DiversityBot"),
-                    timestamp=-1)
-        self.post_chatbot_interventions([{"message": m, "ephemeral": False}])
-
-        c = ConfigGenerator()
-
-        for question in c._get_choice():
-            q = "Enter the value for: {}".format(question)
-            m = Message(text=q,
-                        author=Author(self.chatbot_author_id, "DiversityBot"),
+            m = Message(text="Initializing the Diversity Bot", author=Author(self.chatbot_author_id, "DiversityBot"),
                         timestamp=-1)
             self.post_chatbot_interventions([{"message": m, "ephemeral": False}])
 
-            received_answer = False
-            while not received_answer:
-                transcript = self.request_transcript_and_convert_to_message_list()
+            c = ConfigGenerator()
 
-                for chat in transcript:
-                    if self.filter_transcript(chat):
-                        continue
-                    else:
-                        print("Question: {}, Answer: {}".format(question, chat.text))
-                        c.update_config(question, chat.text)
-                        received_answer = True
+            for question in c._get_choice():
+                q = "Enter the value for: {}".format(question)
+                m = Message(text=q,
+                            author=Author(self.chatbot_author_id, "DiversityBot"),
+                            timestamp=-1)
+                self.post_chatbot_interventions([{"message": m, "ephemeral": False}])
 
-                time.sleep(5)
+                received_answer = False
+                while not received_answer:
+                    transcript = self.request_transcript_and_convert_to_message_list()
 
-        conf_dict = c.get_config()
-        print(conf_dict)
+                    for chat in transcript:
+                        if self.filter_transcript(chat):
+                            continue
+                        else:
+                            print("Question: {}, Answer: {}".format(question, chat.text))
+                            c.update_config(question, chat.text)
+                            received_answer = True
 
-        m = Message(text="Launching plugin {}".format(list(conf_dict.keys())[0]),
-                    author=Author(self.chatbot_author_id, "DiversityBot"),
-                    timestamp=-1)
+                    time.sleep(5)
 
-        self.post_chatbot_interventions([{"message": m, "ephemeral": False}])
+            conf_dict = c.get_config()
+        # print(conf_dict)
+
+            m = Message(text="Launching plugin {}".format(list(conf_dict.keys())[0]),
+                        author=Author(self.chatbot_author_id, "DiversityBot"),
+                        timestamp=-1)
+
+            self.post_chatbot_interventions([{"message": m, "ephemeral": False}])
+
+        else:
+            with open(self.path_to_config, "r") as f:
+                conf_dict = json.load(f)
 
         feature_plugin_classes = [member for member in inspect.getmembers(feature_plugins, inspect.isclass)
                                 if member[1].__module__ == "plugins.feature_plugins" and member[0] in conf_dict.keys()]

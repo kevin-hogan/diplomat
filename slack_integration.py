@@ -7,8 +7,8 @@ from slack_sdk import WebClient
 
 
 class SlackToBotIntegrator(ChatServiceToBotIntegrator):
-    def __init__(self, path_to_config, slack_web_client, channel_id, bot_user_id):
-        super().__init__(path_to_config, chatbot_author_id=bot_user_id)
+    def __init__(self, path_to_config, slack_web_client, channel_id, bot_user_id, dynamic_configuration):
+        super().__init__(path_to_config, chatbot_author_id=bot_user_id, dynamic_configuration=dynamic_configuration)
         self.slack_web_client = slack_web_client
         self.channel_id = channel_id
 
@@ -31,9 +31,10 @@ class SlackToBotIntegrator(ChatServiceToBotIntegrator):
 
 if __name__ == "__main__":
     argv = sys.argv[1:]
-    opts, _ = getopt.getopt(argv, "p:t:c:b:")
+    opts, _ = getopt.getopt(argv, "p:t:c:b:d")
     if len(opts) != 4:
-        print("slack_integration.py -p <path_to_config> -t <slack-bot-token> -c <channel-id> -b <bot-user-id>")
+        print("slack_integration.py -p <path_to_config> -t <slack-bot-token> -c <channel-id> -b <bot-user-id> "
+              "[-d <dynamic-configuration>]")
         sys.exit(2)
     for opt, arg in opts:
         if opt == "-p":
@@ -44,8 +45,10 @@ if __name__ == "__main__":
             channel_id = arg
         elif opt == "-b":
             bot_user_id = arg
+        elif opt == "-d":
+            dynamic_config = arg
 
     client = WebClient(token=slack_bot_token)
-    SBI = SlackToBotIntegrator(path_to_config, client, channel_id, bot_user_id)
+    SBI = SlackToBotIntegrator(path_to_config, client, channel_id, bot_user_id, dynamic_config)
     SBI.seconds_per_poll = 10
     SBI.start()
