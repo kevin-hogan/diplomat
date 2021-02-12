@@ -2,10 +2,71 @@ from chatbot import FeaturePlugin, Message, Author
 from typing import List
 from collections import defaultdict, deque
 from math import isclose
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Dict, Any, Union
 
+from sumy.parsers.html import HtmlParser
+from sumy.parsers.plaintext import PlaintextParser
+from sumy.nlp.tokenizers import Tokenizer
+from sumy.summarizers.lsa import LsaSummarizer as Summarizer
+from sumy.nlp.stemmers import Stemmer
+from sumy.utils import get_stop_words
+
 import string
+
+
+class SummarizerPlugin(FeaturePlugin):
+    def __init__(self, config: dict):
+        self.config = config
+
+    def generate_interventions(self, chat_transcript: List[Message], author_id_for_chatbot: int) -> \
+            List[Dict[str, Union[Message, Any]]]:
+
+        if "/summarize" not in chat_transcript[-1].text:
+            return []
+
+        if chat_transcript[-1].author.id == author_id_for_chatbot:
+            return []
+
+        last_message = chat_transcript[-1].text
+
+        timeline = [i for i in last_message.split() if i.isdigit()]
+
+        td = int("".join(timeline))
+
+        message_list = []
+
+        for chat in chat_transcript:
+            if chat.author.id == author_id_for_chatbot:
+                continue
+
+            if datetime.fromtimestamp(chat.timestamp) < datetime.now() - timedelta(days=td):
+                continue
+
+            message_list.append(chat.text)
+
+        LANGUAGE = "english"
+
+        content = "\n\n".join(message_list)
+
+        stemmer = Stemmer(LANGUAGE)
+
+        summarizer = Summarizer(stemmer)
+        summarizer.stop_words = get_stop_words(LANGUAGE)
+
+        parser = PlaintextParser.from_string(content, Tokenizer(LANGUAGE))
+        return_messages = []
+        statements = []
+
+        for sentence in summarizer(parser.document, self.config["SummarySize"]):
+            statements.append(str(sentence))
+
+        for sentence in list(set(statements)):
+            return_messages.append({"message": Message(author=Author(author_id_for_chatbot, "Summarizer"),
+                                                    timestamp=-1, text=str(sentence))})
+
+        # print(return_messages)
+        return return_messages
 
 
 class DiversityPlugin(FeaturePlugin):

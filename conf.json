@@ -13,5 +13,6 @@
             {"WordList": ["Chairman", "Foreman"], "Substitutes":  "Chairperson, Chair, Moderator, Discussion Leader"}
         ],
         "WarningPhrase": "Please consider using more inclusive terms like {} instead of {}"
-    }
+    },
+    "SummarizerPlugin": {"SummarySize": 5}
 }
