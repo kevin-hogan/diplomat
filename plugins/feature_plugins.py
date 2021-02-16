@@ -5,19 +5,14 @@ from math import isclose
 from datetime import datetime, timedelta
 from typing import Dict, Any, Union
 
-from sumy.parsers.html import HtmlParser
-from sumy.parsers.plaintext import PlaintextParser
-from sumy.nlp.tokenizers import Tokenizer
-from sumy.summarizers.lsa import LsaSummarizer as Summarizer
-from sumy.nlp.stemmers import Stemmer
-from sumy.utils import get_stop_words
-
+from rake_nltk import Rake
 import string
 
 
 class SummarizerPlugin(FeaturePlugin):
     def __init__(self, config: dict):
         self.config = config
+        self.rake = Rake()
 
     def generate_interventions(self, chat_transcript: List[Message], author_id_for_chatbot: int) -> \
             List[Dict[str, Union[Message, Any]]]:
@@ -45,27 +40,17 @@ class SummarizerPlugin(FeaturePlugin):
 
             message_list.append(chat.text)
 
-        LANGUAGE = "english"
-
-        content = "\n\n".join(message_list)
-
-        stemmer = Stemmer(LANGUAGE)
-
-        summarizer = Summarizer(stemmer)
-        summarizer.stop_words = get_stop_words(LANGUAGE)
-
-        parser = PlaintextParser.from_string(content, Tokenizer(LANGUAGE))
-        return_messages = []
         statements = []
+        return_messages = []
 
-        for sentence in summarizer(parser.document, self.config["SummarySize"]):
-            statements.append(str(sentence))
+        self.rake.extract_keywords_from_sentences(message_list)
+        for sentence in self.rake.get_ranked_phrases()[:self.config["SummarySize"]]:
+            statements.append(sentence)
 
         for sentence in list(set(statements)):
             return_messages.append({"message": Message(author=Author(author_id_for_chatbot, "Summarizer"),
                                                     timestamp=-1, text=str(sentence))})
 
-        # print(return_messages)
         return return_messages
 
 
