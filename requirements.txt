@@ -1,2 +1,3 @@
 pytest
 slack_bolt
+rake-nltk
