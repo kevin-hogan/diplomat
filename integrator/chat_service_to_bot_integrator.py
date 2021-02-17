@@ -4,7 +4,7 @@ import inspect
 import json
 
 from plugins import feature_plugins
-from typing import List, Dict, Union, Any
+from typing import List
 from chatbot import Message, generate_interventions, Author
 from datetime import datetime
 from config_generator import ConfigGenerator
@@ -89,7 +89,6 @@ class ChatServiceToBotIntegrator(metaclass=abc.ABCMeta):
                     time.sleep(5)
 
             conf_dict = c.get_config()
-        # print(conf_dict)
 
             m = Message(text="Launching plugin {}".format(list(conf_dict.keys())[0]),
                         author=Author(self.chatbot_author_id, "DiversityBot"),
@@ -105,9 +104,11 @@ class ChatServiceToBotIntegrator(metaclass=abc.ABCMeta):
                                   member[0] in conf_dict.keys()]
 
         plugins = [fpc[1](conf_dict[fpc[0]]) for fpc in feature_plugin_classes]
+        channel_members = self.get_channel_members()
 
         while True:
+
             transcript = self.request_transcript_and_convert_to_message_list()
-            chatbot_messages = generate_interventions(plugins, transcript, self.chatbot_author_id)
+            chatbot_messages = generate_interventions(plugins, transcript, self.chatbot_author_id, channel_members)
             self.post_chatbot_interventions(chatbot_messages)
             time.sleep(self.seconds_per_poll)

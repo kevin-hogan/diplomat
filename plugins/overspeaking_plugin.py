@@ -47,8 +47,8 @@ class OverspeakingPlugin(FeaturePlugin):
                 for author_id, message_count in author_id_to_message_count.items()
                 if message_count >= message_count_threshold]
 
-    def generate_interventions(self, chat_transcript: List[Message], author_id_for_chatbot: int) -> List[
-        Dict[str, Union[Message, Any]]]:
+    def generate_interventions(self, chat_transcript: List[Message], author_id_for_chatbot: int,
+                               channel_members: List) -> List[Dict[str, Union[Message, Any]]]:
         overspeaking_authors = OverspeakingPlugin.get_overspeaking_authors(
             chat_transcript,
             author_id_for_chatbot,

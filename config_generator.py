@@ -2,6 +2,7 @@ from typing import List
 import json
 
 class ConfigGenerator:
+
     def __init__(self):
         self.transcript = None
         self.done = False

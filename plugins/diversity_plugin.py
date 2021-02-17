@@ -18,7 +18,8 @@ class DiversityPlugin(FeaturePlugin):
             for w in c["WordList"]:
                 self.diversity_map[w.lower()] = c["Substitutes"]
 
-    def generate_interventions(self, chat_transcript: List[Message], author_id_for_chatbot: int) -> List[Dict[str, Union[Message, Any]]]:
+    def generate_interventions(self, chat_transcript: List[Message], author_id_for_chatbot: int,
+                               channel_members: List) -> List[Dict[str, Union[Message, Any]]]:
 
         cur_time = datetime.now()
         message_list = []

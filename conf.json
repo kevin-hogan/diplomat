@@ -20,8 +20,20 @@
     "TimeManagementPlugin": {"NotifyEvery": 5},
 
     "OverspeakingPlugin": {
-                "MessageWindow": 5,
-                "MessageCountThreshold": 3,
-                "WarningFormatString": "<@{0}> Thank you for your comments. I would like to hear from others too."
-            }
+        "MessageWindow": 10,
+        "MessageCountThreshold": 3,
+        "WarningFormatString": "Thank you for your comments, <@{0}>. I would like to hear from others too."
+    },
+    "UnderspeakingPlugin": {
+        "MessageWindow": 10,
+        "TimeFilter": true,
+        "TimeFilterRangeMinutes": 60,
+
+        "WarningFormatStrings": [
+            "{0}, would you like to add something to that?",
+            "{0}, you have been kind of quiet. Do you want to say something about this?",
+            "I would love hear what {0} think about this.",
+            "{0}, any comments?"
+        ]
+    }
 }
