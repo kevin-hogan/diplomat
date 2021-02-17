@@ -7,13 +7,24 @@ from slack_sdk import WebClient
 
 
 class SlackToBotIntegrator(ChatServiceToBotIntegrator):
-    def __init__(self, path_to_config, slack_web_client, channel_id, bot_user_id, dynamic_configuration):
+    def __init__(self, path_to_config: str, slack_web_client: WebClient, channel_id: str,
+                 bot_user_id: int, dynamic_configuration: bool):
         super().__init__(path_to_config, chatbot_author_id=bot_user_id, dynamic_configuration=dynamic_configuration)
         self.slack_web_client = slack_web_client
         self.channel_id = channel_id
+        self.members = self.get_channel_members()
+
+    def get_channel_members(self) -> List:
+        response = self.slack_web_client.conversations_members(channel=channel_id)
+        return response.data["members"]
 
     def request_transcript_and_convert_to_message_list(self) -> List[Message]:
-        response = client.conversations_history(channel=self.channel_id)
+        try:
+            response = self.slack_web_client.conversations_history(channel=self.channel_id)
+        except Exception as e:
+            print(e.__str__())
+            return []
+
         messages = [Message(Author(m["user"], m["user"]), m["ts"], m["text"])
                     for m in response.data["messages"] if "user" in m.keys()]
         messages.reverse()
@@ -23,10 +34,10 @@ class SlackToBotIntegrator(ChatServiceToBotIntegrator):
         for m_dict in interventions:
             if m_dict.get("ephemeral", False) is False:
                 i = m_dict["message"]
-                client.chat_postMessage(channel=self.channel_id, text=i.text)
+                self.slack_web_client.chat_postMessage(channel=self.channel_id, text=i.text)
             else:
                 i = m_dict["message"]
-                client.chat_postEphemeral(channel=self.channel_id, text=i.text, user=m_dict["author_id"])
+                self.slack_web_client.chat_postEphemeral(channel=self.channel_id, text=i.text, user=m_dict["author_id"])
 
 
 if __name__ == "__main__":

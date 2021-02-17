@@ -19,6 +19,10 @@ class ChatServiceToBotIntegrator(metaclass=abc.ABCMeta):
         self.dynamic_configuration = dynamic_configuration
 
     @abc.abstractmethod
+    def get_channel_members(self) -> List:
+        pass
+
+    @abc.abstractmethod
     def request_transcript_and_convert_to_message_list(self) -> List[Message]:
         pass
 
