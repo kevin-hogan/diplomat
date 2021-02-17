@@ -24,10 +24,10 @@ class TimeManagementPlugin(FeaturePlugin):
     def generate_interventions(self, chat_transcript: List[Message], author_id_for_chatbot: int) -> \
             List[Dict[str, Union[Message, Any]]]:
 
-        if "/start discussion time=" not in chat_transcript[-1].text and not self.start_spotted:
+        if not chat_transcript[-1].text.startswith("/start discussion time=") and not self.start_spotted:
             return []
 
-        if "/start discussion time=" in chat_transcript[-1].text:
+        if  chat_transcript[-1].text.startswith("/start discussion time="):
             last_message = chat_transcript[-1].text
             timeline = [i for i in last_message if i.isdigit()]
             self.total_time = int("".join(timeline))
@@ -68,7 +68,7 @@ class SummarizerPlugin(FeaturePlugin):
     def generate_interventions(self, chat_transcript: List[Message], author_id_for_chatbot: int) -> \
             List[Dict[str, Union[Message, Any]]]:
 
-        if "/summarize days=" not in chat_transcript[-1].text:
+        if not chat_transcript[-1].text.startswith("/summarize days="):
             return []
 
         if chat_transcript[-1].author.id == author_id_for_chatbot:
