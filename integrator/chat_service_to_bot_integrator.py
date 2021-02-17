@@ -101,8 +101,8 @@ class ChatServiceToBotIntegrator(metaclass=abc.ABCMeta):
             with open(self.path_to_config, "r") as f:
                 conf_dict = json.load(f)
 
-        feature_plugin_classes = [member for member in inspect.getmembers(feature_plugins, inspect.isclass)
-                                if member[1].__module__ == "plugins.feature_plugins" and member[0] in conf_dict.keys()]
+        feature_plugin_classes = [member for member in inspect.getmembers(feature_plugins, inspect.isclass) if
+                                  member[0] in conf_dict.keys()]
 
         plugins = [fpc[1](conf_dict[fpc[0]]) for fpc in feature_plugin_classes]
 
