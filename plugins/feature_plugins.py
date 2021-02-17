@@ -58,7 +58,7 @@ class TimeManagementPlugin(FeaturePlugin):
             time_left = self.total_time - (cur_time - self.start_time).total_seconds() // 60
             return self._compose_message("TimerPlugin: You have {} minutes left".format(time_left),
                                          author_id_for_chatbot)
-
+        return []
 
 class SummarizerPlugin(FeaturePlugin):
     def __init__(self, config: dict):
@@ -154,6 +154,7 @@ class DiversityPlugin(FeaturePlugin):
 
 
 class OverspeakingPlugin(FeaturePlugin):
+
     def __init__(self, config: dict):
         message_window = int(config["MessageWindow"])
         message_count_threshold = int(config["MessageCountThreshold"])

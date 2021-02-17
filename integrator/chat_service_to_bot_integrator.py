@@ -4,7 +4,7 @@ import inspect
 import json
 
 from plugins import feature_plugins
-from typing import List, Dict
+from typing import List, Dict, Union, Any
 from chatbot import Message, generate_interventions, Author
 from datetime import datetime
 from config_generator import ConfigGenerator
@@ -23,7 +23,7 @@ class ChatServiceToBotIntegrator(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def post_chatbot_interventions(self, interventions: Dict) -> None:
+    def post_chatbot_interventions(self, interventions: List[Message]) -> None:
         pass
 
     def filter_transcript(self, chat):

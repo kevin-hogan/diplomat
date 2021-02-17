@@ -37,7 +37,8 @@ class FeaturePlugin(metaclass=abc.ABCMeta):
        pass
 
 
-def generate_interventions(plugins: FeaturePlugin, chat_transcript: List[Message], author_id_for_chatbot: int) -> List[Message]:
+def generate_interventions(plugins: List[FeaturePlugin], chat_transcript: List[Message],
+                           author_id_for_chatbot: int) -> List[Message]:
     messages = []
     for p in plugins:
         messages += p.generate_interventions(chat_transcript, author_id_for_chatbot)
