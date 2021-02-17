@@ -40,7 +40,7 @@ class TimeManagementPlugin(FeaturePlugin):
 
         cur_time = datetime.now()
 
-        if (self.last_notification - self.start_time).total_seconds() // 60 > self.total_time:
+        if (cur_time - self.start_time).total_seconds() / 60 > self.total_time:
             # Signify end of meeting
             message = "TimerPlugin: Your {} minute discussion timer has ended.".format(self.total_time)
             self.start_spotted = False
