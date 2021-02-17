@@ -31,7 +31,7 @@ class UnderspeakingPlugin(FeaturePlugin):
                                channel_members: List) -> List[Dict[str, Union[Message, Any]]]:
 
         # Filter non-chatbot messages
-        # chat_transcript = [x for x in chat_transcript if x.author.id != author_id_for_chatbot]
+        chat_transcript = [x for x in chat_transcript if x.author.id != author_id_for_chatbot]
 
         reversed_chat = chat_transcript[::-1]
 
