@@ -9,6 +9,57 @@ from rake_nltk import Rake
 import string
 
 
+class TimeManagementPlugin(FeaturePlugin):
+    def __init__(self, config: dict):
+        self.config = config
+        self.start_spotted = False
+        self.last_notification = None
+        self.total_time = None
+        self.start_time = None
+
+    @staticmethod
+    def _compose_message(message, author_id_for_chatbot) -> List[Dict[str, Union[Message, Any]]]:
+        return [{"message": Message(author=Author(author_id_for_chatbot, "TimeManagement"), timestamp=-1, text=message)}]
+
+    def generate_interventions(self, chat_transcript: List[Message], author_id_for_chatbot: int) -> \
+            List[Dict[str, Union[Message, Any]]]:
+
+        if "/start discussion time=" not in chat_transcript[-1].text and not self.start_spotted:
+            return []
+
+        if "/start discussion time=" in chat_transcript[-1].text:
+            last_message = chat_transcript[-1].text
+            timeline = [i for i in last_message if i.isdigit()]
+            self.total_time = int("".join(timeline))
+            self.start_spotted = True
+            self.last_notification = datetime.now()
+            self.start_time = datetime.now()
+            # Signal start of the meeting
+            return self._compose_message("TimerPlugin: Discussion Timer set for {} minutes".format(self.total_time),
+                                         author_id_for_chatbot)
+
+        cur_time = datetime.now()
+
+        if (self.last_notification - self.start_time).total_seconds() // 60 > self.total_time:
+            # Signify end of meeting
+            message = "TimerPlugin: Your {} minute discussion timer has ended.".format(self.total_time)
+            self.start_spotted = False
+            self.last_notification = None
+            self.total_time = None
+            return self._compose_message(message, author_id_for_chatbot)
+
+        if (cur_time - self.last_notification).total_seconds() // 60 == 0:
+            # Skip the initial minute right after the notification is sent.
+            return []
+
+        if ((cur_time - self.last_notification).total_seconds() // 60) % self.config["NotifyEvery"] == 0:
+            # Notify!
+            self.last_notification = cur_time
+            time_left = self.total_time - (cur_time - self.start_time).total_seconds() // 60
+            return self._compose_message("TimerPlugin: You have {} minutes left".format(time_left),
+                                         author_id_for_chatbot)
+
+
 class SummarizerPlugin(FeaturePlugin):
     def __init__(self, config: dict):
         self.config = config
@@ -17,7 +68,7 @@ class SummarizerPlugin(FeaturePlugin):
     def generate_interventions(self, chat_transcript: List[Message], author_id_for_chatbot: int) -> \
             List[Dict[str, Union[Message, Any]]]:
 
-        if "/summarize" not in chat_transcript[-1].text:
+        if "/summarize days=" not in chat_transcript[-1].text:
             return []
 
         if chat_transcript[-1].author.id == author_id_for_chatbot:
@@ -85,7 +136,7 @@ class DiversityPlugin(FeaturePlugin):
                 continue
 
             message = chat.text.split()
-            print(chat)
+            # print(chat)
             for m in message:
                 m = m.translate(str.maketrans('', '', string.punctuation))
 

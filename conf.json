@@ -14,5 +14,6 @@
         ],
         "WarningPhrase": "Please consider using more inclusive terms like {} instead of {}"
     },
-    "SummarizerPlugin": {"SummarySize": 5}
+    "SummarizerPlugin": {"SummarySize": 5},
+    "TimeManagementPlugin": {"NotifyEvery": 5}
 }
