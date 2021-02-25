@@ -9,7 +9,7 @@ class UnderspeakingPlugin(FeaturePlugin):
         self.message_window = config["MessageWindow"]
         self.warning_strings = config["WarningFormatStrings"]
         self.time_filter = config["TimeFilter"]
-        self.last_alert = None
+        self.last_alert = {}
 
         if self.time_filter:
             self.time_filter_range = config["TimeFilterRangeMinutes"]
@@ -31,7 +31,7 @@ class UnderspeakingPlugin(FeaturePlugin):
                                channel_members: List) -> List[Dict[str, Union[Message, Any]]]:
 
         # Filter non-chatbot messages
-        chat_transcript = [x for x in chat_transcript if x.author.id != author_id_for_chatbot]
+        # chat_transcript = [x for x in chat_transcript if x.author.id != author_id_for_chatbot]
 
         reversed_chat = chat_transcript[::-1]
 
@@ -48,25 +48,38 @@ class UnderspeakingPlugin(FeaturePlugin):
         if len(reversed_chat) < self.message_window:
             return []
 
-        # Check if we already sent an alert for this time window
-        if self.last_alert is not None and self.last_alert > datetime.fromtimestamp(reversed_chat[0].timestamp):
-            return []
-
         speech_count = UnderspeakingPlugin.get_message_count(reversed_chat)
 
         underspeakers_list = []
 
-        for member, count in speech_count.items():
+        for member in channel_members:
+            count = speech_count.get(member, 0)
             if count < (self.message_window / (len(channel_members) * 2)):
                 underspeakers_list.append(member)
 
         if not underspeakers_list:
             return []
 
-        self.last_alert = datetime.now()
         underspeakers_list = ["<@{}>".format(x) for x in underspeakers_list]
+        filtered_list = []
 
-        authors = ", ".join(underspeakers_list)
+        for speaker in underspeakers_list:
+            if self.last_alert.get(speaker) is None:
+                self.last_alert[speaker] = datetime.now()
+                filtered_list.append(speaker)
+                continue
+
+            # Check if alert has been sent for this time window
+            if self.last_alert[speaker] > datetime.fromtimestamp(reversed_chat[-1].timestamp):
+                continue
+
+            self.last_alert["speaker"] = datetime.now()
+            filtered_list.append(speaker)
+
+        if len(filtered_list) == 0:
+            return []
+
+        authors = ", ".join(filtered_list)
 
         return [{"ephemeral": False, "message": Message(Author(author_id_for_chatbot, "Chatbot"),
                             -1, "{}".format(choice(self.warning_strings).format(authors)))}]

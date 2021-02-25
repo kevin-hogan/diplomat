@@ -15,17 +15,17 @@
         "WarningPhrase": "Please consider using more inclusive terms like {} instead of {}"
     },
 
-    "SummarizerPlugin": {"SummarySize": 5},
+    "SummarizerPlugin": {"SummarySize": 8},
 
     "TimeManagementPlugin": {"NotifyEvery": 5},
 
     "OverspeakingPlugin": {
-        "MessageWindow": 10,
-        "MessageCountThreshold": 3,
+        "MessageWindow": 15,
+        "MessageCountThreshold": 7,
         "WarningFormatString": "Thank you for your comments, <@{0}>. I would like to hear from others too."
     },
     "UnderspeakingPlugin": {
-        "MessageWindow": 10,
+        "MessageWindow": 25,
         "TimeFilter": true,
         "TimeFilterRangeMinutes": 60,
 

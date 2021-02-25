@@ -16,7 +16,7 @@ class SlackToBotIntegrator(ChatServiceToBotIntegrator):
 
     def get_channel_members(self) -> List:
         response = self.slack_web_client.conversations_members(channel=channel_id)
-        members = [member for member in response.data["members"] if member != self.chatbot_author_id]
+        members = [member for member in response.data["members"]]
         return members
 
     def request_transcript_and_convert_to_message_list(self) -> List[Message]:
