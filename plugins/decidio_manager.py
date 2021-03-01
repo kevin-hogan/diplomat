@@ -59,10 +59,17 @@ class DecidioManager(FeaturePlugin):
 
             self.start_spotted = True
             # Signal start of the meeting
-            return self._compose_message("DecidioManager: Diplomat will help you "
+            m1 = self._compose_message("DecidioManager: Diplomat will help you "
                                          "manage your event with id: {}".format(self.event_id),
                                          author_id_for_chatbot)
+            event_name = data.json().get("name", "")
+            creator = data.json().get("creator", {}).get("name", "")
+
+            meetings = data.json().get("meetings", [])
+
+
 
         # Event has been verified and diplomat is helping manage the event.
+
 
         return []

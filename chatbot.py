@@ -15,10 +15,11 @@ class Author():
 
 
 class Message:
-    def __init__(self, author: Author, timestamp: float, text: str):
+    def __init__(self, author: Author, timestamp: float, text: str, blocks: list = None):
         self.author = author
         self.timestamp = float(timestamp)
         self.text = text
+        self.blocks = blocks
 
     def __eq__(self, other):
         return self.author == other.author and self.timestamp == other.timestamp and self.text == other.text

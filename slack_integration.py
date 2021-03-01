@@ -33,9 +33,15 @@ class SlackToBotIntegrator(ChatServiceToBotIntegrator):
 
     def post_chatbot_interventions(self, interventions: List[Dict[str, Union[Message, Any]]]) -> None:
         for m_dict in interventions:
+            i = m_dict["message"]
+
             if m_dict.get("ephemeral", False) is False:
                 i = m_dict["message"]
-                self.slack_web_client.chat_postMessage(channel=self.channel_id, text=i.text)
+
+                if i.blocks is not None:
+                    self.slack_web_client.chat_postMessage(channel=self.channel_id, blocks=i.blocks)
+                else:
+                    self.slack_web_client.chat_postMessage(channel=self.channel_id, text=i.text)
             else:
                 i = m_dict["message"]
                 self.slack_web_client.chat_postEphemeral(channel=self.channel_id, text=i.text, user=m_dict["author_id"])
