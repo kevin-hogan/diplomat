@@ -35,5 +35,10 @@
             "I would love hear what {0} think about this.",
             "{0}, any comments?"
         ]
+    },
+    "DecidioManager": {
+        "url": "https://callay.cs.umd.edu",
+        "username": "",
+        "password": ""
     }
 }
