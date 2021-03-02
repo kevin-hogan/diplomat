@@ -21,15 +21,16 @@ class DecidioManager(FeaturePlugin):
         self.event_start_time = None
         self.notified = False
         self.cum_times = {}
+        self.author_id = None
 
     def authenticate(self):
         json = {"username": self.username, "password": self.password}
         response = requests.post(self.url + "/login/", json=json)
         return response.json()["access_token"]
 
-    def post_json_synchronous(self, uri, json_payload, access_token):
+    def put_json_synchronous(self, uri, json_payload, access_token):
         headers = {"Authorization": "Bearer " + access_token}
-        return requests.post(self.url + uri, headers=headers, json=json_payload)
+        return requests.put(self.url + uri, headers=headers, json=json_payload)
 
     def get_json_synchronous(self, uri, access_token):
         headers = {"Authorization": "Bearer " + access_token}
@@ -54,6 +55,7 @@ class DecidioManager(FeaturePlugin):
     def generate_interventions(self, chat_transcript: List[Message], author_id_for_chatbot: int,
                                channel_members: List) -> List[Dict[str, Union[Message, Any]]]:
 
+        self.author_id = author_id_for_chatbot
         if not chat_transcript[-1].text.startswith("/diplomat manage event=") and not self.start_spotted and \
                 not self.meeting_times_received:
             return []
@@ -204,22 +206,34 @@ class DecidioManager(FeaturePlugin):
         data = self.get_json_synchronous("/v1/events/{}".format(self.event_id), access_token)
         return data.json()["meetings"]
 
+    def _control_meeting(self, meeting, status):
+        meeting_uri = self.default_routes.get(meeting.get("meetingType", None), None)
+
+        if meeting_uri is None:
+            return self._compose_message("Meeting type {} is not supported".format(meeting.get("meetingType", None)),
+                                         self.author_id)
+
+        uri = "/v1/{}/{}".format(meeting_uri, meeting.get("id"))
+        access_token = self.authenticate()
+        meeting["status"] = status
+        response = self.put_json_synchronous(uri, meeting, access_token)
+
+        if response.status_code == 200:
+            self.notified = False
+            return self._compose_message("Meeting *{}* is {}.".format(meeting["name"], meeting["status"]), self.author_id)
+
+        return self._compose_message("Some error occurred while trying to start meeting *{}*.".format(meeting["name"]),
+                                     self.author_id)
+
     def start_meeting(self, meeting):
-        print("Came to start meeting!")
-        print(meeting)
-        self.notified = False
-        return []
+        return self._control_meeting(meeting, "IN_PROGRESS")
 
     def stop_meeting(self, meeting):
-        print("Came to stop meeting!")
-        print(meeting)
-        return []
+        return self._control_meeting(meeting, "COMPLETED")
 
     def notify(self, meeting):
         if self.notified:
             return []
 
-        print("Notify")
-        print(meeting)
         self.notified = True
-        return []
+        return self._compose_message("Only {} minutes left for {} meeting to end".format(2, meeting["name"]), self.author_id)
