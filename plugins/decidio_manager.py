@@ -169,9 +169,10 @@ class DecidioManager(FeaturePlugin):
         meetings = [meeting for meeting in meetings if meeting.get("status") != "COMPLETED"]
 
         if len(meetings) == 0:
+            event_id = self.event_id
             self.reset()
             return self._compose_message("DecidioManager: The "
-                                         "event (id={}) has ended.".format(self.event_id), author_id_for_chatbot)
+                                         "event (id={}) has ended.".format(event_id), author_id_for_chatbot)
 
         # Check if there are any meetings that are to be stopped or to be notified!
         in_progress = False
