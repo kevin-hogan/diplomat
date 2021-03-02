@@ -16,8 +16,11 @@ class DecidioManager(FeaturePlugin):
         self.username = config["username"]
         self.url = config["url"]
         self.password = config["password"]
-        self.meetings = []
+
         self.default_routes = config["default_routes"]
+        self.notify_before = config["notify_before"]
+
+        self.meetings = []
         self.event_start_time = None
         self.notified = False
         self.cum_times = {}
@@ -237,4 +240,5 @@ class DecidioManager(FeaturePlugin):
             return []
 
         self.notified = True
-        return self._compose_message("Only {} minutes left for {} meeting to end".format(2, meeting["name"]), self.author_id)
+        return self._compose_message("Only {} minutes left for {} meeting to end".format(self.notify_before,
+                                                                                         meeting["name"]), self.author_id)

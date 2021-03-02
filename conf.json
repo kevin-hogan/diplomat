@@ -38,7 +38,16 @@
     },
     "DecidioManager": {
         "url": "https://callay.cs.umd.edu",
-        "username": "",
-        "password": ""
+        "username": "diversitybot@gmail.com",
+        "password": "",
+        "default_routes": {
+            "Attendance": "attendancemeetings",
+            "Individual Ranking": "individual-ranking-meeting",
+            "Group Ranking": "group-ranking-meeting",
+            "Individual Input Meeting": "inputmeeting",
+            "Group Input Meeting": "inputmeeting",
+            "Peer Review Meeting": "inputmeeting"
+        },
+        "notify_before": 2
     }
 }
