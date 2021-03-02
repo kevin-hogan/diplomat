@@ -16,12 +16,20 @@ class DecidioManager(FeaturePlugin):
         self.username = config["username"]
         self.url = config["url"]
         self.password = config["password"]
-        self.meetings = None
+        self.meetings = []
+        self.default_routes = config["default_routes"]
+        self.event_start_time = None
+        self.notified = False
+        self.cum_times = {}
 
     def authenticate(self):
         json = {"username": self.username, "password": self.password}
         response = requests.post(self.url + "/login/", json=json)
         return response.json()["access_token"]
+
+    def post_json_synchronous(self, uri, json_payload, access_token):
+        headers = {"Authorization": "Bearer " + access_token}
+        return requests.post(self.url + uri, headers=headers, json=json_payload)
 
     def get_json_synchronous(self, uri, access_token):
         headers = {"Authorization": "Bearer " + access_token}
@@ -34,6 +42,14 @@ class DecidioManager(FeaturePlugin):
     @staticmethod
     def _add_markdown_section(text: str):
         return {"type": "section", "text": {"type": "mrkdwn", "text": text}}
+
+    def reset(self):
+        self.start_spotted = False
+        self.meeting_times_received = False
+        self.event_id = None
+        self.meetings = []
+        self.event_start_time = None
+        self.cum_times = {}
 
     def generate_interventions(self, chat_transcript: List[Message], author_id_for_chatbot: int,
                                channel_members: List) -> List[Dict[str, Union[Message, Any]]]:
@@ -53,21 +69,21 @@ class DecidioManager(FeaturePlugin):
                 access_token = self.authenticate()
 
             except Exception as e:
+                self.reset()
                 return self._compose_message("DecidioManager: The credentials in the config do not match.",
                                              author_id_for_chatbot)
 
             data = self.get_json_synchronous("/v1/events/{}".format(self.event_id), access_token)
 
             if data.status_code != 200:
+                self.reset()
                 return self._compose_message("DecidioManager: Event with id: {} does not exist".format(self.event_id),
                                              author_id_for_chatbot)
 
             if "diplomat" not in [x["name"] for x in data.json().get("participants", [])]:
+                self.reset()
                 return self._compose_message("Decidio Manager: Diplomat not added to the event. "
                                              "Please add diplomat and try again. ", author_id_for_chatbot)
-
-            # Mark start
-            self.start_spotted = True
 
             # Signal start of the meeting
             blocks = list()
@@ -77,17 +93,19 @@ class DecidioManager(FeaturePlugin):
             creator = data.json().get("creator", {}).get("name", "")
 
             meetings = data.json().get("meetings", [])
+            # Only take the scheduled meetings
+            self.meetings = [meeting for meeting in meetings if meeting.get("status", None) == "SCHEDULED"]
 
-            if len(meetings) == 0:
-                return self._compose_message("No meetings added to this event.", author_id_for_chatbot)
+            if len(self.meetings) == 0:
+                self.reset()
+                return self._compose_message("There are no scheduled meetings in this event.", author_id_for_chatbot)
 
-            self.meetings = meetings
             blocks.append("*Event Name:* {}".format(event_name))
             blocks.append("*Created By:* {}".format(creator))
 
             blocks.append("This event has the following meetings: ")
 
-            for meeting in meetings:
+            for meeting in self.meetings:
                 blocks.append("{} ({}) -> id={}".format(meeting["name"], meeting["meetingType"], meeting["id"]))
 
             blocks.append("Please let me know how many minutes do you want each meeting to run.")
@@ -113,15 +131,95 @@ class DecidioManager(FeaturePlugin):
             if len(times) != len(self.meetings):
                 return self._compose_message("DecidioManager: Number of times passed don't match the number of meetings! "
                                              "Please try again.",
+
                                              author_id_for_chatbot)
             try:
-                for id, time in enumerate(times):
-                    self.meetings[id]["timer"] = int(time)
+
+                cum_times = [times[0]]
+
+                for time in times[1:]:
+                    cum_times.append(time + cum_times[-1])
+
+                for id, meeting in enumerate(self.meetings):
+                    self.cum_times[meeting.get("id")] = cum_times[id]
+
             except:
-                return self._compose_message("DecidioManager: Time values should be integers. Please try again.", author_id_for_chatbot)
+                return self._compose_message("DecidioManager: Time values should be integers. Please try again.",
+                                             author_id_for_chatbot)
 
             self.meeting_times_received = True
+            self.event_start_time = datetime.now()
 
+            return self._compose_message("DecidioManager: Diplomat will start the event soon.", author_id_for_chatbot)
 
-        
+        if self.event_start_time is None:
+            return []
+
+        cur_time = datetime.now()
+        time_elapsed = (cur_time - self.event_start_time).total_seconds() // 60
+
+        try:
+            meetings = self.get_meeting_info()
+        except:
+            return self._compose_message("Error occurred while trying to get information related to the meeting",
+                                         author_id_for_chatbot)
+
+        meetings = [meeting for meeting in meetings if meeting.get("status") != "COMPLETED"]
+
+        if len(meetings) == 0:
+            self.reset()
+            return self._compose_message("DecidioManager: The "
+                                         "event (id={}) has ended.".format(self.event_id), author_id_for_chatbot)
+
+        # Check if there are any meetings that are to be stopped or to be notified!
+        in_progress = False
+
+        for meeting in meetings:
+            if meeting.get("status") != "IN_PROGRESS":
+                continue
+
+            # Time has elapsed!
+            if self.cum_times[meeting["id"]] <= time_elapsed:
+                return self.stop_meeting(meeting)
+
+            # Send notification.
+            if self.cum_times[meeting["id"]] - time_elapsed <= 2:
+                return self.notify(meeting)
+
+            in_progress = True
+
+        # Check if there are meetings to be started.
+        if in_progress:
+            return []
+
+        # Start the first scheduled meeting
+        for meeting in self.meetings:
+            if meeting.get("status") == "SCHEDULED":
+                return self.start_meeting(meeting)
+
+        return []
+
+    def get_meeting_info(self):
+        access_token = self.authenticate()
+        data = self.get_json_synchronous("/v1/events/{}".format(self.event_id), access_token)
+        return data.json()["meetings"]
+
+    def start_meeting(self, meeting):
+        print("Came to start meeting!")
+        print(meeting)
+        self.notified = False
+        return []
+
+    def stop_meeting(self, meeting):
+        print("Came to stop meeting!")
+        print(meeting)
+        return []
+
+    def notify(self, meeting):
+        if self.notified:
+            return []
+
+        print("Notify")
+        print(meeting)
+        self.notified = True
         return []
