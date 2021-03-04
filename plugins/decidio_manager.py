@@ -82,7 +82,8 @@ class DecidioManager(FeaturePlugin):
 
             if data.status_code != 200:
                 self.reset()
-                return self._compose_message("DecidioManager: Event with id: {} does not exist".format(self.event_id),
+                event_id = self.event_id
+                return self._compose_message("DecidioManager: Event with id: {} does not exist".format(event_id),
                                              author_id_for_chatbot)
 
             if "diplomat" not in [x["name"] for x in data.json().get("participants", [])]:
