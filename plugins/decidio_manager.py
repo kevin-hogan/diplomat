@@ -16,6 +16,7 @@ class DecidioManager(FeaturePlugin):
         self.username = config["username"]
         self.url = config["url"]
         self.password = config["password"]
+        self.links = {}
 
         self.default_routes = config["default_routes"]
         self.notify_before = config["notify_before"]
@@ -34,6 +35,10 @@ class DecidioManager(FeaturePlugin):
     def put_json_synchronous(self, uri, json_payload, access_token):
         headers = {"Authorization": "Bearer " + access_token}
         return requests.put(self.url + uri, headers=headers, json=json_payload)
+
+    def patch_json_synchronous(self, uri, json_payload, access_token):
+        headers = {"Authorization": "Bearer " + access_token}
+        return requests.patch(self.url + uri, headers=headers, json=json_payload)
 
     def get_json_synchronous(self, uri, access_token):
         headers = {"Authorization": "Bearer " + access_token}
@@ -54,6 +59,7 @@ class DecidioManager(FeaturePlugin):
         self.meetings = []
         self.event_start_time = None
         self.cum_times = {}
+        self.links = {}
 
     def get_results(self, last_message, author_id):
         m_id = [i for i in last_message if i.isdigit()]
@@ -134,11 +140,32 @@ class DecidioManager(FeaturePlugin):
             blocks.append("Please let me know how many minutes do you want each meeting to run.")
             blocks.append('Respond in the format: `/diplomat assign times [time1, time2...]`. '
                           'time1, time2 are times in minutes in the same order for meetings listed above.')
+            blocks.append('You can also use the command `/diplomat link meetings [meeting_id1, meeting_id2]` if you want'
+                          ' `meeting_id2` to use output of `meeting_id1` as it\'s input')
 
             blocks = [self._add_markdown_section(x) for x in blocks]
 
             return [{"message": Message(author=Author(author_id_for_chatbot, "DecidioManager"), timestamp=-1,
                                         blocks=blocks, text="")}]
+
+        # Now check if there are any events which need to be linked.
+        if self.start_spotted and chat_transcript[-1].text.startswith("/diplomat link meetings") and not \
+                self.meeting_times_received:
+            message = chat_transcript[-1].text
+            try:
+                links = re.findall(r'\[.*?\]', message)[0]
+                links = loads(links)
+            except Exception as e:
+                return self._compose_message("DecidioManager: Incorrect format used. "
+                                             "Please try again", author_id_for_chatbot)
+
+            if len(links) != 2:
+                return self._compose_message("DecidioManager: You can only link 2 "
+                                             "meetings at a time.", author_id_for_chatbot)
+
+            self.links[links[1]] = links[0]
+            return self._compose_message("DecidioManager: Meeting {} successfully "
+                                         "linked with meeting {}".format(links[1], links[0]), author_id_for_chatbot)
 
         # Event has been verified and diplomat is helping manage the event.
         if self.start_spotted and chat_transcript[-1].text.startswith("/diplomat assign times") and not \
@@ -251,7 +278,44 @@ class DecidioManager(FeaturePlugin):
         return self._compose_message("Some error occurred while trying to start meeting *{}*.".format(meeting["name"]),
                                      self.author_id)
 
+    def _get_previous_meetings_input(self, event_id, meeting_id):
+        access_token = self.authenticate()
+        data = self.get_json_synchronous("/v1/events/{}".format(event_id), access_token)
+
+        if data.status_code != 200:
+            return []
+
+        next_options = []
+        for meeting in data.json()["meetings"]:
+            if meeting["id"] == meeting_id:
+                options = meeting.get("responses", [])
+                next_options = [x["text"] for x in options]
+                break
+
+        return next_options
+
+    def patch_meeting(self, meeting):
+        meeting_id = meeting.get("id", None)
+        meeting_uri = self.default_routes.get(meeting.get("meetingType", None), None)
+
+        if meeting_uri is None:
+            return self._compose_message("Meeting type {} is not supported".format(meeting.get("meetingType", None)),
+                                         self.author_id)
+        uri = "/v1/{}/{}".format(meeting_uri, meeting.get("id"))
+        access_token = self.authenticate()
+        previous_meeting_id = self.links[meeting_id]
+
+        options = self._get_previous_meetings_input(self.event_id, previous_meeting_id)
+        payload = {"rankingOptions": options, "pointsToMeeting": previous_meeting_id}
+        self.patch_json_synchronous(uri, payload, access_token)
+
     def start_meeting(self, meeting):
+        # Need to patch options
+        meeting_id = meeting.get("id", None)
+        print(self.links)
+        if self.links.get(meeting_id) is not None:
+            self.patch_meeting(meeting)
+
         return self._control_meeting(meeting, "IN_PROGRESS")
 
     def stop_meeting(self, meeting):
