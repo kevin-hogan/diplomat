@@ -188,8 +188,11 @@ class DecidioManager(FeaturePlugin):
         if len(meetings) == 0:
             event_id = self.event_id
             self.reset()
-            return self._compose_message("DecidioManager: The "
-                                         "event (id={}) has ended.".format(event_id), author_id_for_chatbot)
+
+            message = "DecidioManager: The event (id={}) has ended.\n".format(event_id)
+            message += "You can use the command `/diplomat show meeting results=<meeting_id>` to see the results of your meeting.\n"
+
+            return self._compose_message(message, author_id_for_chatbot)
 
         # Check if there are any meetings that are to be stopped or to be notified!
         in_progress = False
