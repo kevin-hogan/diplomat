@@ -40,6 +40,8 @@
         "url": "https://callay.cs.umd.edu",
         "username": "diversitybot@gmail.com",
         "password": "",
+        "results_url": "http://localhost:5555/v1/results/individual-rankings",
+        "topk": 10,
         "default_routes": {
             "Attendance": "attendancemeetings",
             "Individual Ranking": "individual-ranking-meeting",
