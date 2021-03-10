@@ -109,6 +109,8 @@ class ChatServiceToBotIntegrator(metaclass=abc.ABCMeta):
         while True:
 
             transcript = self.request_transcript_and_convert_to_message_list()
-            chatbot_messages = generate_interventions(plugins, transcript, self.chatbot_author_id, channel_members)
-            self.post_chatbot_interventions(chatbot_messages)
+            if transcript:
+                chatbot_messages = generate_interventions(plugins, transcript, self.chatbot_author_id, channel_members)
+                self.post_chatbot_interventions(chatbot_messages)
+
             time.sleep(self.seconds_per_poll)
