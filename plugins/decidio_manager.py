@@ -55,20 +55,24 @@ class DecidioManager(FeaturePlugin):
         self.event_start_time = None
         self.cum_times = {}
 
+    def get_results(self, last_message, author_id):
+        m_id = [i for i in last_message if i.isdigit()]
+        payload = {"meeting_id": int("".join(m_id)), "topk": self.config["topk"]}
+        results = requests.get(self.config["results_url"], params=payload).json().get("rankings", [])
+
+        if len(results) == 0:
+            return self._compose_message("No results to show for meeting with id: {}".format(m_id),
+                                         author_id)
+        message = "\n-------------------------------------------------------------\n".join(results)
+        return self._compose_message(message, author_id)
+
     def generate_interventions(self, chat_transcript: List[Message], author_id_for_chatbot: int,
                                channel_members: List) -> List[Dict[str, Union[Message, Any]]]:
 
+        # This can become a separate plugin!
         if chat_transcript[-1].text.startswith("/diplomat show meeting results="):
             last_message = chat_transcript[-1].text
-            m_id = [i for i in last_message if i.isdigit()]
-            payload = {"meeting_id": int("".join(m_id)), "topk": self.config["topk"]}
-            results = requests.get(self.config["results_url"], params=payload).json().get("rankings", [])
-
-            if len(results) == 0:
-                return self._compose_message("No results to show for meeting with id: {}".format(m_id),
-                                             author_id_for_chatbot)
-            message = "\n-------------------------------------------------------------\n".join(results)
-            return self._compose_message(message, author_id_for_chatbot)
+            return self.get_results(last_message, author_id_for_chatbot)
 
         self.author_id = author_id_for_chatbot
 
