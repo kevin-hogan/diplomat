@@ -21,7 +21,7 @@ class TimeManagementPlugin(FeaturePlugin):
         if not chat_transcript[-1].text.startswith("/start discussion time=") and not self.start_spotted:
             return []
 
-        if  chat_transcript[-1].text.startswith("/start discussion time="):
+        if chat_transcript[-1].text.startswith("/start discussion time="):
             last_message = chat_transcript[-1].text
             timeline = [i for i in last_message if i.isdigit()]
             self.total_time = int("".join(timeline))

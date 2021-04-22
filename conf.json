@@ -39,7 +39,7 @@
     "DecidioManager": {
         "url": "https://callay.cs.umd.edu",
         "username": "diversitybot@gmail.com",
-        "password": "",
+        "password": "randompassword123",
         "results_url": "http://localhost:5555/v1/results/individual-rankings",
         "topk": 10,
         "default_routes": {
@@ -51,5 +51,15 @@
             "Peer Review Meeting": "inputmeeting"
         },
         "notify_before": 2
+    },
+    "MentionPlugin": {
+        "mention_list": {"Bloody":  "Bloody", "Mary": "Mary"},
+        "notify_times": 2,
+        "WarningFormatStrings": [
+            "Please don't miss out on speaking about the topics '{0}' as well",
+            "Please ensure that you have covered the topics '{0}' in your discussion!",
+            "I hope you haven't missed out on speaking about the topics '{0}'",
+            "I may have missed this but looks like you haven't spoken a lot about '{0}' during your discussion."
+        ]
     }
 }
