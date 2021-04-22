@@ -26,6 +26,8 @@ class MentionPlugin(FeaturePlugin):
 
     @staticmethod
     def _compose_message(message, author_id_for_chatbot) -> List[Dict[str, Union[Message, Any]]]:
+        if not message:
+            return []
         return [
             {"message": Message(author=Author(author_id_for_chatbot, "MentionPlugin"), timestamp=-1, text=message)}]
 
@@ -52,6 +54,9 @@ class MentionPlugin(FeaturePlugin):
             elapsed_time = (datetime.now() - self.start_time).total_seconds()
             if elapsed_time - mention_time_elapsed > ((self.total_time * 60) / 2):
                 alerts.append(explanations)
+
+        if not alerts:
+            return ""
 
         return phrase.format(", ".join(alerts))
 
@@ -111,7 +116,7 @@ class MentionPlugin(FeaturePlugin):
         if time_elapsed % notify_minutes != 0:
             return []
 
-        print(self.mention_counter)
+        # print(self.mention_counter)
         if not self.last_notification:
             self.last_notification = cur_time
             message = self.notify()
