@@ -25,7 +25,7 @@
         "WarningFormatString": "Thank you for your comments, <@{0}>. I would like to hear from others too."
     },
     "UnderspeakingPlugin": {
-        "MessageWindow": 25,
+        "MessageWindow": 30,
         "TimeFilter": true,
         "TimeFilterRangeMinutes": 60,
 

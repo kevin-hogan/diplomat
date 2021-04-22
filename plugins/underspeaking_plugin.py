@@ -54,7 +54,7 @@ class UnderspeakingPlugin(FeaturePlugin):
 
         for member in channel_members:
             count = speech_count.get(member, 0)
-            if count < (self.message_window / (len(channel_members) * 2)):
+            if count < (self.message_window / (len(channel_members) * 4)):
                 underspeakers_list.append(member)
 
         if not underspeakers_list:
