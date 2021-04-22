@@ -53,7 +53,7 @@
         "notify_before": 2
     },
     "MentionPlugin": {
-        "mention_list": {"Bloody":  "Bloody", "Mary": "Mary"},
+        "mention_list": {"Name":  "Name the country", "Flag": "Design a flag", "Laws":  "Create any laws"},
         "notify_times": 2,
         "WarningFormatStrings": [
             "Please don't miss out on speaking about the topics '{0}' as well",

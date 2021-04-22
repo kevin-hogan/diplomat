@@ -42,6 +42,7 @@ class MentionPlugin(FeaturePlugin):
         alerts = []
 
         for word, explanations in self.mention_explanations.items():
+            word = word.lower()
             if self.mention_counter.get(word) is None:
                 alerts.append(explanations)
                 continue
@@ -94,7 +95,8 @@ class MentionPlugin(FeaturePlugin):
         for elem in unprocessed_list:
             words = elem.text.split()
             for word in words:
-                if word.lower() in self.mention_list:
+                word = word.lower()
+                if word in self.mention_list:
                     if self.mention_counter.get(word) is None:
                         self.mention_counter[word] = datetime.fromtimestamp(elem.timestamp)
                     self.mention_counter[word] = max(self.mention_counter[word], datetime.fromtimestamp(elem.timestamp))
