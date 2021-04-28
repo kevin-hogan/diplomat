@@ -28,7 +28,12 @@
     "OverspeakingPlugin": {
         "MessageWindow": 15,
         "MessageCountThreshold": 7,
-        "WarningFormatString": "Thank you for your comments, <@{0}>. I would like to hear from others too."
+        "WarningFormatStrings": ["Thank you for your comments, <@{0}>. I would like to hear from others too.",
+            "Thank you <@{0}>. What do others have to say about this?",
+            "Thank you for your input <@{0}>. What opinions do others have on this?",
+            "I really appreciate <@{0}> for taking lead on this discussion. Let's hear from others too."
+        ],
+        "NotificationThreshold": 2
     },
     "UnderspeakingPlugin": {
         "MessageWindow": 30,
@@ -38,7 +43,7 @@
         "WarningFormatStrings": [
             "{0}, would you like to add something to that?",
             "{0}, you have been kind of quiet. Do you want to add something to this?",
-            "I would love hear what {0} think about this.",
+            "I would love to hear what {0} think about this.",
             "{0}, any comments?"
         ]
     },

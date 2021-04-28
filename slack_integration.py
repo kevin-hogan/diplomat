@@ -64,7 +64,8 @@ if __name__ == "__main__":
     channel_id = None
     bot_user_id = None
     path_to_config = None
-    observers_list = ["U01P0CLLCDP", "U01V6CFTJ3D"]
+    observers_list = []
+    # observers_list = ["U01P0CLLCDP", "U01V6CFTJ3D"] # People added the observers list will be ignored by Diplomat completely.
 
     for opt, arg in opts:
         if opt == "-p":

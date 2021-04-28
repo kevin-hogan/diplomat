@@ -1,7 +1,8 @@
 from chatbot import FeaturePlugin, Message, Author
 from collections import defaultdict, deque
 from typing import Dict, Any, Union, List
-
+from random import choice
+from datetime import datetime
 
 class OverspeakingPlugin(FeaturePlugin):
 
@@ -12,7 +13,9 @@ class OverspeakingPlugin(FeaturePlugin):
             raise ValueError()
         self.message_window = message_window
         self.message_count_threshold = message_count_threshold
-        self.warning_format_string = str(config["WarningFormatString"])
+        self.warning_format_strings = config["WarningFormatStrings"]
+        self.last_notification = None
+        self.notification_threshold = config["NotificationThreshold"]
 
     @staticmethod
     def get_overspeaking_authors(
@@ -54,8 +57,22 @@ class OverspeakingPlugin(FeaturePlugin):
             author_id_for_chatbot,
             self.message_window,
             self.message_count_threshold)
+
         overspeaking_warnings = [{"ephemeral": False, "message": Message(Author(author_id_for_chatbot, "Chatbot"),
-                                                                         -1, self.warning_format_string.format(a.name))}
+                                                                         -1, choice(self.warning_format_strings).format(a.name))}
                                  for a in overspeaking_authors]
 
+        if len(overspeaking_authors) == 0:
+            return []
+
+        if self.last_notification is None:
+            self.last_notification = datetime.now()
+            return overspeaking_warnings
+
+        # check if we sent out a notification from this plugin in the last "notification_threshold" minutes.
+        if (datetime.now() - self.last_notification).total_seconds() < self.notification_threshold * 60:
+            return []
+
+        # Update last notification.
+        self.last_notification = datetime.now()
         return overspeaking_warnings
