@@ -81,7 +81,7 @@ class TimeManagementPlugin(FeaturePlugin):
                 last_message_at_time = datetime.fromtimestamp(chat_transcript[-1].timestamp)
                 break
 
-        time_since_last_message = (cur_time - last_message_at_time).total_seconds()
+        time_since_last_message = (cur_time - last_message_at_time).total_seconds() // 60
 
         if not self.config.get("EnableCustomNotifications", False):
             return []
@@ -98,7 +98,7 @@ class TimeManagementPlugin(FeaturePlugin):
             else:
                 pass_value = time_left
 
-            output = self.apply_operation(pass_value, notif["value"] * 60, notif["op"])
+            output = self.apply_operation(pass_value, notif["value"], notif["op"])
 
             if output != 0:
                 continue
