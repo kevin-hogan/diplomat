@@ -38,7 +38,7 @@ class SummarizerPlugin(FeaturePlugin):
         statements = []
         return_messages = []
 
-        self.rake.extract_keywords_from_sentences(message_list)
+        self.rake.extract_keywords_from_text(". ".join(message_list))
         for sentence in self.rake.get_ranked_phrases()[:self.config["SummarySize"]]:
             statements.append(sentence)
 
