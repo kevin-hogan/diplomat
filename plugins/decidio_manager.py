@@ -312,7 +312,7 @@ class DecidioManager(FeaturePlugin):
     def start_meeting(self, meeting):
         # Need to patch options
         meeting_id = meeting.get("id", None)
-        print(self.links)
+        # print(self.links)
         if self.links.get(meeting_id) is not None:
             self.patch_meeting(meeting)
 
