@@ -30,7 +30,8 @@ class OverspeakingPlugin(FeaturePlugin):
 
         for message in chat_transcript:
             author_id_to_author[message.author.id] = message.author
-            if message.author.id == author_id_for_chatbot:
+            # Making sure the right message is recorded!
+            if message.author.id == author_id_for_chatbot and "Thank you" in message.text:
                 for (author_id, count) in author_id_to_message_count.items():
                     if count >= message_count_threshold:
                         author_id_to_message_count[author_id] = 0
