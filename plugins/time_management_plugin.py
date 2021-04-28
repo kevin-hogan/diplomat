@@ -15,6 +15,23 @@ class TimeManagementPlugin(FeaturePlugin):
     def _compose_message(message, author_id_for_chatbot) -> List[Dict[str, Union[Message, Any]]]:
         return [{"message": Message(author=Author(author_id_for_chatbot, "TimeManagement"), timestamp=-1, text=message)}]
 
+    @staticmethod
+    def apply_operation(a, b, op):
+        if op == "-":
+            return a-b
+
+        if op == "+":
+            return a + b
+
+        if op == "*":
+            return a * b
+
+        if op == "%" and b !=0:
+            return a % b
+
+        if op == "/" and b != 0:
+            return int(a / b)
+
     def generate_interventions(self, chat_transcript: List[Message], author_id_for_chatbot: int,
                                channel_members: List) -> List[Dict[str, Union[Message, Any]]]:
 
@@ -46,10 +63,28 @@ class TimeManagementPlugin(FeaturePlugin):
             # Skip the initial minute right after the notification is sent.
             return []
 
-        if ((cur_time - self.last_notification).total_seconds() // 60) % self.config["NotifyEvery"] == 0:
-            # Notify!
-            self.last_notification = cur_time
-            time_left = self.total_time - (cur_time - self.start_time).total_seconds() // 60
-            return self._compose_message("TimerPlugin: You have {} minutes left".format(time_left),
-                                         author_id_for_chatbot)
+        time_left = self.total_time - (cur_time - self.start_time).total_seconds() // 60
+        elapsed = (cur_time - self.start_time).total_seconds() // 60
+
+        if not self.config.get("EnableCustomNotifications", False):
+            return []
+
+        for notif in self.config.get("CustomNotifications", []):
+            if notif.get("parameter", "time_left") == "elapsed":
+                pass_value = elapsed
+            else:
+                pass_value = time_left
+
+            output = self.apply_operation(pass_value, notif["value"], notif["op"])
+
+            if output == 0:
+                self.last_notification = cur_time
+                return self._compose_message(notif.get("message", "TimerPlugin: You have {} minutes left").format(time_left),
+                                             author_id_for_chatbot)
+        #
+        # if ((cur_time - self.last_notification).total_seconds() // 60) % self.config["NotifyEvery"] == 0:
+        #     # Notify!
+        #     self.last_notification = cur_time
+        #     return self._compose_message("TimerPlugin: You have {} minutes left".format(time_left),
+        #                                  author_id_for_chatbot)
         return []
