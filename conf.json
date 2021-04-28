@@ -21,7 +21,7 @@
         "EnableCustomNotifications": true,
         "CustomNotifications":[
             {"op":  "%", "value": 2, "parameter": "elapsed", "message":  "You have {} minutes left."},
-            {"op": "-", "value": 2, "parameter": "time_left", "message":  "{} minutes left for the discussion to end. It would be good to start summarizing the discussion."},
+            {"op": "-", "value": 1, "parameter": "time_left", "message":  "{} minutes left for the discussion to end. It would be good to start summarizing the discussion."}
         ]
     },
 
