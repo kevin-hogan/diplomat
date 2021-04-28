@@ -39,13 +39,13 @@
         "MessageWindow": 30,
         "TimeFilter": true,
         "TimeFilterRangeMinutes": 60,
-
         "WarningFormatStrings": [
             "{0}, would you like to add something to that?",
             "{0}, you have been kind of quiet. Do you want to add something to this?",
             "I would love to hear what {0} think about this.",
             "{0}, any comments?"
-        ]
+        ],
+        "NotificationThreshold": 2
     },
     "DecidioManager": {
         "url": "https://callay.cs.umd.edu",

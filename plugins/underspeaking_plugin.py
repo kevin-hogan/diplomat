@@ -5,16 +5,17 @@ from random import choice
 
 
 class UnderspeakingPlugin(FeaturePlugin):
+
     def __init__(self, config: Dict):
         self.message_window = config["MessageWindow"]
         self.warning_strings = config["WarningFormatStrings"]
         self.time_filter = config["TimeFilter"]
         self.last_alert = {}
-
+        self.last_notification = None
         if self.time_filter:
             self.time_filter_range = config["TimeFilterRangeMinutes"]
+        self.notification_threshold = config["NotificationThreshold"]
 
-        pass
 
     @staticmethod
     def get_message_count(chat_transcript: List[Message]) -> Dict:
@@ -79,8 +80,12 @@ class UnderspeakingPlugin(FeaturePlugin):
         if len(filtered_list) == 0:
             return []
 
-        authors = ", ".join(filtered_list)
+        if self.last_notification is not None and \
+                (datetime.now() - self.last_notification).total_seconds() < self.notification_threshold * 60:
+            return []
 
+        self.last_notification = datetime.now()
+        authors = ", ".join(filtered_list)
         return [{"ephemeral": False, "message": Message(Author(author_id_for_chatbot, "Chatbot"),
                                                         -1, "{}".format(choice(self.warning_strings).format(authors)))}]
 
