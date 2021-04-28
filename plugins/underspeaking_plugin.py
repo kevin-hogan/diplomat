@@ -82,6 +82,6 @@ class UnderspeakingPlugin(FeaturePlugin):
         authors = ", ".join(filtered_list)
 
         return [{"ephemeral": False, "message": Message(Author(author_id_for_chatbot, "Chatbot"),
-                            -1, "{}".format(choice(self.warning_strings).format(authors)))}]
+                                                        -1, "{}".format(choice(self.warning_strings).format(authors)))}]
 
 

@@ -12,11 +12,12 @@ from config_generator import ConfigGenerator
 
 class ChatServiceToBotIntegrator(metaclass=abc.ABCMeta):
     def __init__(self, path_to_config: str, seconds_per_poll: float = 10, chatbot_author_id: int = -1,
-                 dynamic_configuration: bool = False):
+                 dynamic_configuration: bool = False, observers_list: List = None):
         self.path_to_config = path_to_config
         self.seconds_per_poll = seconds_per_poll
         self.chatbot_author_id = chatbot_author_id
         self.dynamic_configuration = dynamic_configuration
+        self.observers_list = observers_list
 
     @abc.abstractmethod
     def get_channel_members(self) -> List:
